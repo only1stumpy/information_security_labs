@@ -6,13 +6,29 @@ export default function Home() {
   const [text, setText] = useState("");
   const [method, setMethod] = useState("permutation");
   const [result, setResult] = useState("");
+  const [rsaP, setRsaP] = useState("");
+  const [rsaQ, setRsaQ] = useState("");
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (operation?: "encrypt" | "decrypt") => {
     try {
+      const body: {
+        text: string;
+        method: string;
+        operation?: "encrypt" | "decrypt";
+        rsaP?: number;
+        rsaQ?: number;
+      } = { text, method, operation };
+
+      // Добавляем параметры RSA если они указаны
+      if (method === "RSA") {
+        if (rsaP) body.rsaP = Number(rsaP);
+        if (rsaQ) body.rsaQ = Number(rsaQ);
+      }
+
       const response = await fetch("/api/encrypt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, method }),
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();
@@ -69,7 +85,14 @@ export default function Home() {
 
         <select
           value={method}
-          onChange={(e) => setMethod(e.target.value)}
+          onChange={(e) => {
+            setMethod(e.target.value);
+            // Очистить поля RSA при смене метода
+            if (e.target.value !== "RSA") {
+              setRsaP("");
+              setRsaQ("");
+            }
+          }}
           className="w-full border border-[#fca311] rounded-xl p-3 mb-6 bg-[#000000] text-[#e5e5e5]
                      focus:outline-none focus:ring-2 focus:ring-[#fca311] max-w-lg"
         >
@@ -81,6 +104,37 @@ export default function Home() {
           <option value="SHA-256">SHA-256</option>
         </select>
 
+        {method === "RSA" && (
+          <div className="w-full flex gap-3 mb-6 max-w-lg">
+            <div className="flex-1">
+              <label className="block text-[#e5e5e5] text-sm mb-2">
+                Параметр p (простое число)
+              </label>
+              <input
+                type="number"
+                placeholder="Автогенерация"
+                value={rsaP}
+                onChange={(e) => setRsaP(e.target.value)}
+                className="w-full border border-[#fca311] rounded-xl p-3 bg-[#000000] text-[#e5e5e5]
+                           placeholder-[#e5e5e5]/60 focus:outline-none focus:ring-2 focus:ring-[#fca311]"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-[#e5e5e5] text-sm mb-2">
+                Параметр q (простое число)
+              </label>
+              <input
+                type="number"
+                placeholder="Автогенерация"
+                value={rsaQ}
+                onChange={(e) => setRsaQ(e.target.value)}
+                className="w-full border border-[#fca311] rounded-xl p-3 bg-[#000000] text-[#e5e5e5]
+                           placeholder-[#e5e5e5]/60 focus:outline-none focus:ring-2 focus:ring-[#fca311]"
+              />
+            </div>
+          </div>
+        )}
+
         <button
           onClick={() => fillInput(method)}
           className="w-full py-3 bg-[#fca311] text-[#000000] rounded-xl font-semibold
@@ -88,13 +142,33 @@ export default function Home() {
         >
           Использовать данные из методички
         </button>
-        <button
-          onClick={handleSubmit}
-          className="w-full py-3 bg-[#fca311] text-[#000000] rounded-xl font-semibold
-                     hover:bg-[#ffb627] transition-all shadow-md max-w-lg"
-        >
-          Подтвердить
-        </button>
+
+        {method === "caesar" ? (
+          <div className="w-full flex gap-2 max-w-lg">
+            <button
+              onClick={() => handleSubmit("encrypt")}
+              className="flex-1 py-3 bg-[#fca311] text-[#000000] rounded-xl font-semibold
+                         hover:bg-[#ffb627] transition-all shadow-md"
+            >
+              Зашифровать
+            </button>
+            <button
+              onClick={() => handleSubmit("decrypt")}
+              className="flex-1 py-3 bg-[#fca311] text-[#000000] rounded-xl font-semibold
+                         hover:bg-[#ffb627] transition-all shadow-md"
+            >
+              Расшифровать
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => handleSubmit()}
+            className="w-full py-3 bg-[#fca311] text-[#000000] rounded-xl font-semibold
+                       hover:bg-[#ffb627] transition-all shadow-md max-w-lg"
+          >
+            Подтвердить
+          </button>
+        )}
 
         {result && (
           <div className="mt-8 w-full max-w-4xl bg-[#000000] border border-[#fca311] rounded-xl p-4 text-[#e5e5e5]">

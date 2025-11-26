@@ -8,6 +8,8 @@ export default function Home() {
   const [result, setResult] = useState("");
   const [rsaP, setRsaP] = useState("");
   const [rsaQ, setRsaQ] = useState("");
+  const [rsaE, setRsaE] = useState("");
+  const [rsaKey, setRsaKey] = useState("");
 
   const handleSubmit = async (operation?: "encrypt" | "decrypt") => {
     try {
@@ -17,12 +19,16 @@ export default function Home() {
         operation?: "encrypt" | "decrypt";
         rsaP?: number;
         rsaQ?: number;
+        rsaE?: number;
+        rsaKey?: string;
       } = { text, method, operation };
 
       // Добавляем параметры RSA если они указаны
       if (method === "RSA") {
         if (rsaP) body.rsaP = Number(rsaP);
         if (rsaQ) body.rsaQ = Number(rsaQ);
+        if (rsaE) body.rsaE = Number(rsaE);
+        if (rsaKey) body.rsaKey = rsaKey;
       }
 
       const response = await fetch("/api/encrypt", {
@@ -91,6 +97,8 @@ export default function Home() {
             if (e.target.value !== "RSA") {
               setRsaP("");
               setRsaQ("");
+              setRsaE("");
+              setRsaKey("");
             }
           }}
           className="w-full border border-[#fca311] rounded-xl p-3 mb-6 bg-[#000000] text-[#e5e5e5]
@@ -105,34 +113,62 @@ export default function Home() {
         </select>
 
         {method === "RSA" && (
-          <div className="w-full flex gap-3 mb-6 max-w-lg">
-            <div className="flex-1">
+          <>
+            <div className="w-full flex gap-3 mb-4 max-w-lg">
+              <div className="flex-1">
+                <label className="block text-[#e5e5e5] text-sm mb-2">
+                  Параметр p (простое число)
+                </label>
+                <input
+                  type="number"
+                  placeholder="Автогенерация"
+                  value={rsaP}
+                  onChange={(e) => setRsaP(e.target.value)}
+                  className="w-full border border-[#fca311] rounded-xl p-3 bg-[#000000] text-[#e5e5e5]
+                             placeholder-[#e5e5e5]/60 focus:outline-none focus:ring-2 focus:ring-[#fca311]"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-[#e5e5e5] text-sm mb-2">
+                  Параметр q (простое число)
+                </label>
+                <input
+                  type="number"
+                  placeholder="Автогенерация"
+                  value={rsaQ}
+                  onChange={(e) => setRsaQ(e.target.value)}
+                  className="w-full border border-[#fca311] rounded-xl p-3 bg-[#000000] text-[#e5e5e5]
+                             placeholder-[#e5e5e5]/60 focus:outline-none focus:ring-2 focus:ring-[#fca311]"
+                />
+              </div>
+            </div>
+            <div className="w-full mb-4 max-w-lg">
               <label className="block text-[#e5e5e5] text-sm mb-2">
-                Параметр p (простое число)
+                Открытая экспонента e
               </label>
               <input
                 type="number"
-                placeholder="Автогенерация"
-                value={rsaP}
-                onChange={(e) => setRsaP(e.target.value)}
+                placeholder="По умолчанию: 3, 5, 17, 257, или 65537"
+                value={rsaE}
+                onChange={(e) => setRsaE(e.target.value)}
                 className="w-full border border-[#fca311] rounded-xl p-3 bg-[#000000] text-[#e5e5e5]
                            placeholder-[#e5e5e5]/60 focus:outline-none focus:ring-2 focus:ring-[#fca311]"
               />
             </div>
-            <div className="flex-1">
+            <div className="w-full mb-6 max-w-lg">
               <label className="block text-[#e5e5e5] text-sm mb-2">
-                Параметр q (простое число)
+                Ключ для шифра Вижинера
               </label>
               <input
-                type="number"
-                placeholder="Автогенерация"
-                value={rsaQ}
-                onChange={(e) => setRsaQ(e.target.value)}
+                type="text"
+                placeholder="По умолчанию: бебе"
+                value={rsaKey}
+                onChange={(e) => setRsaKey(e.target.value)}
                 className="w-full border border-[#fca311] rounded-xl p-3 bg-[#000000] text-[#e5e5e5]
                            placeholder-[#e5e5e5]/60 focus:outline-none focus:ring-2 focus:ring-[#fca311]"
               />
             </div>
-          </div>
+          </>
         )}
 
         <button

@@ -3,7 +3,6 @@
  * Поддерживает различные криптографические алгоритмы
  */
 
-import { alpha } from "motion";
 import { NextResponse } from "next/server";
 
 /**
